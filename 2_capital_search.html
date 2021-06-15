@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capital Search</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+    <style>
+        body {
+            background: url(assets/bg.jpg) no-repeat;
+            background-size: cover;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container" style="background-color:aqua">
+        <div class="d-flex justify-content-center" style="background-color:antiquewhite">
+            <form class="col-md-4 py-5" onsubmit="onClickSearchBtn()">
+                <div class="input-group">
+                    <input class="form-control" id="countryCode" type="text"
+                        placeholder="Enter a 3-letter country code">
+                    <button class="btn btn-danger" type="button" onclick="onClickSearchBtn()">Search</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const base_url = "https://restcountries.eu/rest/v2/alpha/";
+
+        function onClickSearchBtn() {
+            event.preventDefault(); // prevent refresh on 'enter'
+            const country_element = document.getElementById("countryCode");
+            const country_code = country_element.value.toLowerCase();
+            country_element.value = ""; // reset input field value
+            console.log(country_code);
+        }
+    </script>
+</body>
+
+</html>
