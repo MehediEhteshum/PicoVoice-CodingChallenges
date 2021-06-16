@@ -1,3 +1,10 @@
+<!-- 
+Problem statement #2:
+[JavaScript/TypeScript]
+Use modern JavaScript and HTML5 to access information from the https://restcountries.eu/ API. The goal is to display a list of all the capital cities for the country and all of its neighbouring countries. E.g. Searching for “USA” will result in a list showing "Washington, D.C.", "Ottawa", and "Mexico City".
+You may assume that you have access to all ES2017 features.. Hint: if your solution queries a country with N neighbours, it should not then make N sequential calls to the API. -->
+
+<!-- Solution: -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -14,32 +21,114 @@
         body {
             background: url(assets/bg.jpg) no-repeat;
             background-size: cover;
+            background-position: center;
+            height: 100vh;
         }
     </style>
 </head>
 
 <body>
-    <div class="container" style="background-color:aqua">
-        <div class="d-flex justify-content-center" style="background-color:antiquewhite">
+    <div class="container">
+        <div class="d-flex justify-content-center">
             <form class="col-md-4 py-5" onsubmit="onClickSearchBtn()">
+                <h3 class="pb-3" style="text-align: center;">Search Country Capital</h3>
                 <div class="input-group">
-                    <input class="form-control" id="countryCode" type="text"
-                        placeholder="Enter a 3-letter country code">
+                    <input class="form-control" id="country-code" type="text" placeholder="Enter a country code"
+                        required>
                     <button class="btn btn-danger" type="button" onclick="onClickSearchBtn()">Search</button>
                 </div>
             </form>
+        </div>
+        <div id="country-div" style="display: none;">
+            <div class="col-md-6 m-auto p-3" id="country-info" style="background-color:#ffffffd9; border-radius: 1rem;">
+                <h4 id="country-name"></h4>
+                <p>
+                    <b>Capital: </b><span id="capital"></span>
+                </p>
+                <b>Neighbouring Countries & Their Capitals:</b>
+            </div>
         </div>
     </div>
 
     <script>
         const base_url = "https://restcountries.eu/rest/v2/alpha/";
+        const url_border = "https://restcountries.eu/rest/v2/alpha?codes=";
+        let borders; // neighbouring countries. format example: can;mex
 
         function onClickSearchBtn() {
             event.preventDefault(); // prevent refresh on 'enter'
-            const country_element = document.getElementById("countryCode");
-            const country_code = country_element.value.toLowerCase();
-            country_element.value = ""; // reset input field value
-            console.log(country_code);
+            const input_element = document.getElementById("country-code");
+            const country_code = input_element.value.toLowerCase();
+            if (country_code === "" || country_code === null) {
+                // preventing empty input on button click
+                alert("Please provide a country code.");
+                return;
+            }
+            input_element.value = ""; // reset input field value
+            getCountryData(base_url + country_code); // getting country data
+        }
+
+        function getCountryData(url) {
+            let promise = fetch(url);
+            promise.then((res) => {
+                if (res.ok) {
+                    // if response status ok
+                    return res.json();
+                } else {
+                    throw "Error";
+                }
+            }).then((country_data) => {
+                document.getElementById("country-name").innerText = country_data.name;
+                document.getElementById("capital").innerText = country_data.capital;
+                borders = country_data.borders.join(";").toLowerCase();
+                // checking existence of js created elements
+                let ul = document.getElementById("neighbours-list");
+                let span = document.getElementById("no-neighbour");
+                if (ul !== null) {
+                    ul.remove(); // removing previous element if exists
+                }
+                if (span !== null) {
+                    span.remove(); // removing previous element if exists
+                }
+                if (borders !== "") {
+                    // if the country has neighbours
+                    getNeighbouringCountriesData(url_border + borders); // getting neighbours data
+                } else {
+                    // the country has no neighbour
+                    span = document.createElement("span"); // create new span
+                    span.id = "no-neighbour";
+                    span.innerText = "No neighbouring country.";
+                    document.getElementById("country-info").appendChild(span);
+                }
+                document.getElementById("country-div").style.display = "block"; // make the div visible
+            }).catch((err) => {
+                document.getElementById("country-div").style.display = "none"; // make the div hidden
+                console.error(err);
+                alert("Please enter a valid country code or check your network connection and try again!");
+            });
+        }
+
+        function getNeighbouringCountriesData(url) {
+            let promise = fetch(url);
+            promise.then((res) => {
+                if (res.ok) {
+                    // if response status ok
+                    return res.json();
+                } else {
+                    throw "Error";
+                }
+            }).then((data) => {
+                let ul = document.createElement("ul"); // create new ul of neighbours
+                ul.id = "neighbours-list";
+                data.forEach((country_data) => {
+                    let li = document.createElement("li");
+                    li.innerText = country_data.name + " >> " + country_data.capital;
+                    ul.appendChild(li);
+                });
+                document.getElementById("country-info").appendChild(ul);
+            }).catch((err) => {
+                console.error(err);
+            });
         }
     </script>
 </body>
